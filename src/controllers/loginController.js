@@ -1,12 +1,9 @@
-var jwt = require("jsonwebtoken");
 var bcrypt = require("bcrypt");
+var jwt = require("jsonwebtoken");
 var usersData = require("../../users");
 var validator = require("../validator/validator");
 
-let users = Array.from(usersData.users);
-
 var signup = (req, res) => {
-  console.log(req.body);
 
   if (
     req.body.fullName &&
@@ -25,7 +22,7 @@ var signup = (req, res) => {
       return;
     }
 
-    if (validator.isEmailRegistered(req.body.email, users)) {
+    if (validator.isEmailRegistered(req.body.email, usersData.getUsers())) {
       res.status(500).send({
         status: "false",
         message: "Email address is already registered. Please try again",
@@ -42,12 +39,11 @@ var signup = (req, res) => {
       password: bcrypt.hashSync(req.body.password, 8),
     };
 
-    users.push(user);
+    usersData.addUsers(user);
 
     res.status(200).send({
       message: "User Registered successfully",
     });
-    console.log(users);
   } else {
     res.status(500).send({
       status: "false",
@@ -58,7 +54,7 @@ var signup = (req, res) => {
 };
 
 var signin = (req, res) => {
-  let user = users.find((user) => user.email === req.body.email);
+  let user = usersData.findUserWithEmail(req.body.email);
 
   if (user) {
   } else {
@@ -94,32 +90,9 @@ var signin = (req, res) => {
   });
 };
 
-const verifyToken = (req, res, next) => {
-  if (req.headers && req.headers.authorization && req.headers.authorization.split(' ')[0] == 'Bearer') {
-    jwt.verify(req.headers.authorization.split(' ')[1], process.env.API_SECRET, function (err, decode) {
-      if (err)  {
-        req.user = undefined;
-        next();
-      }
-      console.log(decode);
-      let user = users.find((user) => user.email === decode.email);
-      console.log(user);
-      if (user) {
-        req.user = user;
-        next();
-      }
-      else {
-        res.status(500).send({
-            message: 'User not found'
-        });
-      }
-    });
-  }
-};
-
 
 const updatePreference = (preference, email) => {
-  let user = users.find((user) => user.email === email);
+  let user = usersData.findUserWithEmail(email);
 
   user.preference = preference;
 }
@@ -128,4 +101,4 @@ const getUsers = () => {
   return users;
 }
 
-module.exports = { signin, signup, verifyToken, updatePreference, getUsers };
+module.exports = { signin, signup, updatePreference, getUsers };

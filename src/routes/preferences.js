@@ -1,7 +1,6 @@
 const preferencesRoutes = require('express').Router();
 const bodyParser = require('body-parser');
 var usersData = require("../../users");
-const { updatePreference} = require('../controllers/loginController');
 
 preferencesRoutes.use(bodyParser.urlencoded({ extended: false }));
 preferencesRoutes.use(bodyParser.json());
@@ -35,14 +34,16 @@ preferencesRoutes.get('/', (req, res) => {
       });
     }
 
-    if (!req.preference == null) {
+    if (!req.body.preference == null) {
         res.status(500).send({
             message: "please send preference in body"
           });
           return;
       }
       else {
-        updatePreference(preference, req.user.email);
+        let user = usersData.findUserWithEmail(req.user.email);
+        user.preference = req.body.preference;
+        usersData.updateUser(user);
       }
 
     res.status(200);

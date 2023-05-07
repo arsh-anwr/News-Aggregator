@@ -1,15 +1,13 @@
 const newsRoutes = require('express').Router();
 const bodyParser = require('body-parser');
-const {getUsers} = require('../controllers/loginController');
+var usersData = require("../../users");
 
 newsRoutes.use(bodyParser.urlencoded({ extended: false }));
 newsRoutes.use(bodyParser.json());
 
-newsRoutes.post('/',async(req,res)=>{
+newsRoutes.get('/',async(req,res)=>{
     
-   let users = getUsers();
-
-   let user = users.find((user) => user.email === req.user.email);
+   let user = usersData.findUserWithEmail(req.user.email);
 
     try {
         var url = `http://newsapi.org/v2/everything?q=${user.preference}&apiKey=${process.env.API_SECRET_KEY}`

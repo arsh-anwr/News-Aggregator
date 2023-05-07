@@ -2,8 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const routes = require('express').Router();
-const {signin, signup, verifyToken } = require("./controllers/loginController.js");
+const {signin, signup} = require("./controllers/loginController.js");
+const {verifyToken} = require("./middleware/authJWT.js"); 
 const preferences = require("./routes/preferences.js");
+const news = require("./routes/news.js");
 
 require("dotenv")
   .config();
